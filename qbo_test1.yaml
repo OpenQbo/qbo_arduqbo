@@ -1,0 +1,54 @@
+port1: /dev/ttyUSB0
+port2: /dev/ttyUSB1
+rate: 15.0
+controllers: {
+    "j_con": {
+        type: joint_controller,
+        joints: ["head_pan_joint","head_tilt_joint"],
+        rate: 15.0,
+        topic: /cmd_joints
+    },
+    "b_con": {
+        type: base_controller,
+        rate: 15.0,
+        topic: /cmd_vel,
+        odom_topic: /odom
+    },
+    "m_con": {
+        type: mouth_controller,
+        topic: /cmd_mouth
+    },
+    "bat_con": {
+        type: battery_controller,
+        topic: /battery_state,
+        rate: 0.0066
+    },
+    "mic_con": {
+        type: mics_controller,
+        rate: 1.0,
+        topic: /cmd_mics,
+        mics_topic: /mics_state
+    },
+    "sens_con": {
+        type: sensors_controller,
+        rate: 5.0,
+        topic: /srf10_state,
+        sensors: {
+          front: {
+            front_left_srf10: { type: srf10, address: 232, frame_id: front_left_addon },
+          },
+          floor: {
+            floor_sensor: {type: gp2d12, address: 8, frame_id: front_addon },
+          }
+        }
+    }
+}
+controlledservos: {
+    head_pan_joint: {id: 1, invert: true, max_angle: 85.0, min_angle: -85.0, neutral: 1460},
+    head_tilt_joint: {id: 2, invert: true, max_angle: 20.0, min_angle: -70.0, neutral: 1380}
+}
+uncontrolledservos: {
+    left_eyelid_joint: {id: 4, invert: true, max_angle: 180.0, min_angle: -180.0, range: 360.0},
+    right_eyelid_joint: {id: 3, max_angle: 180.0, min_angle: -180.0, range: 360.0}
+}
+joint_states_topic: /joint_states
