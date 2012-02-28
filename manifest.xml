@@ -16,7 +16,7 @@
   <depend package="geometry_msgs"/>
   <depend package="nav_msgs"/>
   <depend package="std_srvs"/>
-  <depend package="cereal_port"/>
+  <depend package="qbo_cereal_port"/>
   <!-- <depend package="pcl"/> -->
 
 </package>
