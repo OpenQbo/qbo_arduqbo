@@ -22,16 +22,9 @@ rosbuild_genmsg()
 rosbuild_gensrv()
 
 #common commands for building c++ executables and libraries
-#rosbuild_add_library(${PROJECT_NAME} src/example.cpp)
-#target_link_libraries(${PROJECT_NAME} another_library)
-#rosbuild_add_boost_directories()
-#rosbuild_link_boost(${PROJECT_NAME} thread)
-#rosbuild_add_executable(example examples/example.cpp)
-#target_link_libraries(example ${PROJECT_NAME})
-
 rosbuild_add_library(arduqbo_instructions_lib src/driver/arduqbo_instructions.cpp)
 rosbuild_add_library(qboduino_driver_lib src/driver/qboduino_driver.cpp)
-target_link_libraries(arduqbo_instructions_lib qboduino_driver_lib)
+target_link_libraries(qboduino_driver_lib arduqbo_instructions_lib)
 
 rosbuild_add_library(servos_lib src/servos.cpp)
 
@@ -48,4 +41,5 @@ rosbuild_add_library(imu_controller_lib src/controllers/imu_controller.cpp)
 rosbuild_add_library(irs_controller_lib src/controllers/infra_red_recievers_controller.cpp)
 
 rosbuild_add_executable(qbo_arduqbo src/qbo_arduqbo.cpp)
-target_link_libraries(qbo_arduqbo cereal_port arduqbo_instructions_lib base_controller_lib battery_controller_lib joint_controller_lib lcd_controller_lib mics_controller_lib mouth_controller_lib nose_controller_lib srf10_controller_lib imu_controller_lib irs_controller_lib pthread)
+target_link_libraries(qbo_arduqbo cereal_port qboduino_driver_lib base_controller_lib battery_controller_lib joint_controller_lib lcd_controller_lib mics_controller_lib mouth_controller_lib nose_controller_lib srf10_controller_lib imu_controller_lib irs_controller_lib pthread)ble(qbo_arduqbo src/qbo_arduqbo.cpp)
+
