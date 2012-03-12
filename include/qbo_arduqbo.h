@@ -33,15 +33,15 @@
 #include <std_msgs/String.h>
 #include <map>
 #include <vector>
-
-
-//TODO: Floor Distance, infraRed sensors
+#include "qbo_arduqbo/Test.h"
 
 class CSerialController : public CQboduinoDriver
 {
 public:
   CSerialController(std::string port1="/dev/ttyUSB0", int baud1=115200, std::string port2="/dev/ttyUSB1", int baud2=115200, float timeout1=0.05, float timeout2=0.05, double rate=15, ros::NodeHandle nh=ros::NodeHandle("~"));
   ~CSerialController();
+
+  bool qboTestService(qbo_arduqbo::Test::Request  &req, qbo_arduqbo::Test::Response &res);
 
 private:
   double rate_;
@@ -56,6 +56,7 @@ private:
   ros::Publisher joint_pub_;
 
   void timerCallback(const ros::TimerEvent& e);
+  ros::ServiceServer qboTestService_;
 };
 
 #endif /* QBO_ARDUQBO_H_ */

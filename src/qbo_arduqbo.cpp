@@ -51,6 +51,8 @@ CSerialController::CSerialController(std::string port1, int baud1, std::string p
   CQboduinoDriver(port1, baud1, port2, baud2, timeout1, timeout2), rate_(rate), nh_(nh)
 {
   //Check parameters in ROS_PARAM and start controllers
+  //Advertise the test service
+  qboTestService_=nh_.advertiseService("/Qbo/test_service", &CSerialController::qboTestService, this);
   //Check for controllers that are governed by the head board
   if(boards_.count("head")==1)
   {
@@ -243,6 +245,53 @@ void CSerialController::timerCallback(const ros::TimerEvent& e) {
   joint_state.header.stamp = ros::Time::now();
   //publish
   joint_pub_.publish(joint_state);
+}
+
+bool CSerialController::qboTestService(qbo_arduqbo::Test::Request  &req, qbo_arduqbo::Test::Response &res)
+{
+  //estado de qboard1
+  if(boards_.count("base")==1)
+  {
+    std::map<uint8_t,unsigned short> sensorsDistances;
+    uint8_t I2cDevicesState=0;
+    res.Qboard1=true;
+    getDistanceSensors(sensorsDistances);
+    std::map<uint8_t,unsigned short>::iterator p;
+    uint8_t i=0;
+    res.SRFAddress.clear();
+    for(p = sensorsDistances.begin(); p != sensorsDistances.end(); p++)
+    {
+      res.SRFAddress.push_back(p->first);
+      i++;
+    }
+    res.SRFcount=i;
+    //res.SRFAddress=0;
+    getI2cDevicesState(I2cDevicesState);
+    res.Gyroscope=I2cDevicesState&0x01;
+    res.Accelerometer=I2cDevicesState&0x02;
+    res.LCD=I2cDevicesState&0x04;
+    res.Qboard3=I2cDevicesState&0x08;
+    //Obtener SRFCount
+    //sus direcciones
+    //gyro, acel y lcd
+  }
+  else
+  {
+    res.Qboard1=true;
+    //Obtener SRFCount
+    res.SRFcount=0;
+    res.Gyroscope=false;
+    res.Accelerometer=false;
+    res.LCD=false;
+    res.Qboard3=false;
+  }
+  //estado de qboard2
+  if(boards_.count("head")==1)
+    res.Qboard2=true;
+  else
+    res.Qboard2=false;
+
+  return true;
 }
 
 int main(int argc, char** argv)

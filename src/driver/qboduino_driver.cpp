@@ -518,6 +518,17 @@ int CQboduinoDriver::getIRs(uint8_t& ir0,uint8_t& ir1,uint8_t& ir2)
     return code;
 }
 
+int CQboduinoDriver::getI2cDevicesState(uint8_t& state)
+{
+    std::vector<dataUnion> data,sent;
+
+    CComando comand=comandosSet_.getI2cDevicesState;
+    int code=lockAndSendComand("base",comand,data,sent);
+    if (code<0) return code;
+    state=(uint16_t)data[0].b;
+    return code;
+}
+
 uint8_t pearson(uint8_t *key, uint8_t len)
 {
   uint8_t hash=0;

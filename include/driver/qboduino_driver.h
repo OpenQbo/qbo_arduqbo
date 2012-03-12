@@ -91,6 +91,7 @@ public:
     int resetStall();
     int getState(uint8_t& state);
     int getIRs(uint8_t& ir0,uint8_t& ir1,uint8_t& ir2);
+    int getI2cDevicesState(uint8_t& state);
 
 protected:
 
