@@ -52,7 +52,7 @@ CSerialController::CSerialController(std::string port1, int baud1, std::string p
 {
   //Check parameters in ROS_PARAM and start controllers
   //Advertise the test service
-  qboTestService_=nh_.advertiseService("/Qbo/test_service", &CSerialController::qboTestService, this);
+  qboTestService_=nh_.advertiseService("/qbo_arduqbo/test_service", &CSerialController::qboTestService, this);
   //Check for controllers that are governed by the head board
   if(boards_.count("head")==1)
   {

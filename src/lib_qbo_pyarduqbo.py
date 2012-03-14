@@ -28,6 +28,7 @@ import sys
 import time
 import math
 from qbo_arduqbo.msg import *
+from qbo_arduqbo.srv import *
 from geometry_msgs.msg import Twist
 from sensor_msgs.msg import PointCloud
 from sensor_msgs.msg import JointState
@@ -98,12 +99,32 @@ class qbo_control_client():
         rospy.Subscriber('/distance_sensors_state/front_right_sensor', PointCloud, self.frontalRightsrf10Cb, queue_size=1)
         rospy.Subscriber('/distance_sensors_state/front_left_sensor', PointCloud, self.frontalLeftsrf10Cb, queue_size=1)
 
+        #test service
+        self.test_client = rospy.ServiceProxy('/qbo_arduqbo/test_service', Test)
+
     def node_info(self):
         nodeInfo={}
         nodeInfo['name']='qbo_arduqbo'
         nodeParams=['speed','position','LCD','SRFs','headServos','eyesServos','MICs','battery','mouth']
         nodeInfo['params']=nodeParams
         nodeInfo['status']='Working'
+#Test
+    def testBoards(self):
+        try:
+          testResponse = self.test_client()
+          testDic={}
+          testDic['SRFcount']=testResponse.SRFcount
+          testDic['SRFAddress']=testResponse.SRFAddress
+          testDic['Gyroscope']=testResponse.Gyroscope
+          testDic['Accelerometer']=testResponse.Accelerometer
+          testDic['LCD']=testResponse.LCD
+          testDic['Qboard3']=testResponse.Qboard3
+          testDic['Qboard1']=testResponse.Qboard1
+          testDic['Qboard2']=testResponse.Qboard2
+          return testDic
+        except Exception, e:
+          print 'Error: ',e
+          return False
 
 #Sensores
     def ultrasonic_cloud_callback(self,data,points):

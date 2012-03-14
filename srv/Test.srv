@@ -23,6 +23,6 @@ int16[] SRFAddress
 bool Gyroscope
 bool Accelerometer
 bool LCD
-int8 Qboard3
-int8 Qboard1
-int8 Qboard2
+bool Qboard3
+bool Qboard1
+bool Qboard2
