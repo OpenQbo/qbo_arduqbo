@@ -5,6 +5,6 @@ Priority: standard
 Architecture: amd64
 Depends: 
 Maintainer: Miguel Angel Julian <miguel.a.j@openqbo.org>
-Homepage: http://openqbo.org/software/qbo_arduqbo
+Homepage: http://openqbo.org/wiki/doku.php?id=qbo_apps:ros_pack:qbo_arduqbo
 Description: This package is the ROS serial driver of the controller boards of QBO.
  This package is the ROS serial driver of the controller boards of QBO. It is needed to control the movement and sensors of QBO.
