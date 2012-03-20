@@ -22,8 +22,8 @@ controllers: {
         topic: /cmd_mouth
     },
     "n_con": {
-        type: nariz_controller,
-        topic: /cmd_nariz
+        type: nose_controller,
+        topic: /cmd_nose
     },
     "lcd_con": {
         type: lcd_controller,
