@@ -96,8 +96,8 @@ class qbo_control_client():
         rospy.Subscriber('/battery_state', BatteryLevel, self.batteryCb, queue_size=1)
         rospy.Subscriber('/srf10_states', PointCloud, self.srf10Cb, queue_size=1)
         rospy.Subscriber('/odom', Odometry, self.odometryCb, queue_size=1)
-        rospy.Subscriber('/distance_sensors_state/front_right_sensor', PointCloud, self.frontalRightsrf10Cb, queue_size=1)
-        rospy.Subscriber('/distance_sensors_state/front_left_sensor', PointCloud, self.frontalLeftsrf10Cb, queue_size=1)
+        rospy.Subscriber('/distance_sensors_state/front_right_srf10', PointCloud, self.frontalRightsrf10Cb, queue_size=1)
+        rospy.Subscriber('/distance_sensors_state/front_left_srf10', PointCloud, self.frontalLeftsrf10Cb, queue_size=1)
 
         #test service
         self.test_client = rospy.ServiceProxy('/qbo_arduqbo/test_service', Test)
