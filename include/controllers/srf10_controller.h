@@ -31,6 +31,7 @@
 #include <ros/console.h>
 #include <map>
 #include <vector>
+#include <set>
 #include <sensor_msgs/PointCloud.h>
 //#include <sensor_msgs/PointCloud2.h>
 //#include <pcl/io/pcd_io.h>
@@ -59,6 +60,7 @@ class CSrf10Controller : public CController
 {
     public:
         CSrf10Controller(std::string name, CQboduinoDriver *device_p, ros::NodeHandle& nh);
+        std::set<uint8_t> getConfiguredSrfs(void);
         ~CSrf10Controller();
 
     protected:

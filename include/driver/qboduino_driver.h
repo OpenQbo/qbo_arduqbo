@@ -89,7 +89,7 @@ public:
     int getAdcReads(std::vector<uint8_t> addreses, std::vector<unsigned int>& readedValues);
     int getIMU(int16_t& gyroX,int16_t& gyroY,int16_t& gyroZ,int8_t& accelerometerX,int8_t& accelerometerY,int8_t& accelerometerZ);
     int resetStall();
-    int getState(uint8_t& state);
+    int getMotorsState(uint8_t& state);
     int getIRs(uint8_t& ir0,uint8_t& ir1,uint8_t& ir2);
     int getI2cDevicesState(uint8_t& state);
 

@@ -36,8 +36,9 @@ CLCDController::CLCDController(std::string name, CQboduinoDriver *device_p, ros:
     //osloaded_msg.msg="QBO ready to accept orders";
     //setLCD(&osloaded_msg);
     std::string hello;
-    hello.push_back(12);
-    hello+="QBO ready to accept orders";
+    //hello.push_back(12);
+    //hello+="QBO ready to accept orders";
+    hello+="PC connected        ";
     //device_p_->setLCD("QBO ready to accept orders");
     device_p_->setLCD(hello);
 }

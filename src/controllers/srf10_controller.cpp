@@ -70,6 +70,21 @@ void CDistanceSensor::publish(unsigned int readedValue, ros::Time time)
 	    distance=(6787.0 /((float)readedValue - 3.0)) - 4.0;
       //std::cout << "gp2d12 " << distance << std::endl;
     }
+    else if(type_.compare("GP2Y0A21YK")==0)
+    {
+            //distance=(6787.0 /((float)readedValue - 3.0)) - 4.0;
+       //double x; 
+       //double y; 
+       //double ans; 
+       //x = calcu_data;  /* A/D data = Voltage V*/ 
+       //y = -1.2027; 
+       //ans = pow(x, y);  /* ans = x^(-1.2027) */ 
+       //X_voltage = ans; 
+       //// convert from voltage to distance) 
+       //distance = 27.22 * (X_voltage);
+       
+       distance = 12343.85 * pow((float)readedValue,-1.15);
+    }
     cloud_.points[0].x=distance;
     cloud_.header.stamp=time;
     //pcl::toROSMsg(cloud_,msg_)
@@ -122,7 +137,7 @@ CSrf10Controller::CSrf10Controller(std::string name, CQboduinoDriver *device_p, 
 	    srf10Sensors_[(uint8_t)address]=new CDistanceSensor((*it).first, (uint8_t)address, sensor_topic, nh, type, frame_id);
 	    srf10SensorsUpdateGroup_[(uint8_t)address]=1;
 	}
-	else if (type.compare("gp2d12")==0 || type.compare("gp2d120")==0)
+	else if (type.compare("gp2d12")==0 || type.compare("gp2d120")==0 || type.compare("GP2Y0A21YK")==0)
 	{
 	    adcSensors_[(uint8_t)address]=new CDistanceSensor((*it).first, (uint8_t)address, sensor_topic, nh, type, frame_id);
 	    adcSensorsAddresses_.push_back((uint8_t)address);
@@ -164,7 +179,7 @@ CSrf10Controller::CSrf10Controller(std::string name, CQboduinoDriver *device_p, 
 	    srf10Sensors_[(uint8_t)address]=new CDistanceSensor((*it).first, (uint8_t)address, sensor_topic, nh, type, frame_id);
 	    srf10SensorsUpdateGroup_[(uint8_t)address]=1;
 	}
-	else if (type.compare("gp2d12")==0 || type.compare("gp2d120")==0)
+	else if (type.compare("gp2d12")==0 || type.compare("gp2d120")==0  || type.compare("GP2Y0A21YK")==0)
 	{
 	    adcSensors_[(uint8_t)address]=new CDistanceSensor((*it).first, (uint8_t)address, sensor_topic, nh, type, frame_id);
 	    adcSensorsAddresses_.push_back((uint8_t)address);
@@ -206,7 +221,7 @@ CSrf10Controller::CSrf10Controller(std::string name, CQboduinoDriver *device_p, 
 	    ROS_WARN("srf10 sensors can only be declared at positions front or back");
 	    continue;
 	}
-	else if (type.compare("gp2d12")==0 || type.compare("gp2d120")==0)
+	else if (type.compare("gp2d12")==0 || type.compare("gp2d120")==0  || type.compare("GP2Y0A21YK")==0)
 	{
 	    adcSensors_[(uint8_t)address]=new CDistanceSensor((*it).first, (uint8_t)address, sensor_topic, nh, type, frame_id);
 	    adcSensorsAddresses_.push_back((uint8_t)address);
@@ -273,4 +288,15 @@ void CSrf10Controller::timerCallback(const ros::TimerEvent& e)
 	    }
 	}
     }
+}
+
+std::set<uint8_t> CSrf10Controller::getConfiguredSrfs(void)
+{
+    std::set<uint8_t> configuredSrfs;
+    std::map< uint8_t,CDistanceSensor * >::iterator it;
+    for (it=srf10Sensors_.begin();it!=srf10Sensors_.end();it++)
+    {
+      configuredSrfs.insert((*it).first);
+    }
+    return configuredSrfs;
 }

@@ -46,6 +46,13 @@
 #include <controllers/imu_controller.h>
 #include <controllers/infra_red_recievers_controller.h>
 
+#include <unistd.h>
+#include <stdio.h>
+#include <sys/types.h>
+#include <ifaddrs.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+
 
 CSerialController::CSerialController(std::string port1, int baud1, std::string port2, int baud2, float timeout1, float timeout2, double rate, ros::NodeHandle nh) :
   CQboduinoDriver(port1, baud1, port2, baud2, timeout1, timeout2), rate_(rate), nh_(nh)
@@ -144,6 +151,9 @@ CSerialController::CSerialController(std::string port1, int baud1, std::string p
     nh_.param("joint_states_topic", topic, std::string("joint_states"));
     joint_pub_ = nh_.advertise<sensor_msgs::JointState>(topic, 1);
     timer_=nh_.createTimer(ros::Duration(1/rate_),&CSerialController::timerCallback,this);
+    //printf("arranco el timer");
+    //ipTimer_=nh_.createTimer(ros::Duration(10),&CSerialController::ipTimerCallback,this);
+    //printf("timer arrancado");
   }
   //Check for controllers that are governed by the base board
   if(boards_.count("base")==1)
@@ -179,13 +189,17 @@ CSerialController::CSerialController(std::string port1, int baud1, std::string p
 	  else if(type.compare("sensors_controller")==0)
 	  {
 	    ROS_INFO("sensors_controller started");
-	    controllersList_.push_back(new CSrf10Controller((*it).first, this, nh));
+            sensorsController_ = new CSrf10Controller((*it).first, this, nh);
+	    controllersList_.push_back(sensorsController_);
 	  }
 	  //Back LCD controller
           else if(type.compare("lcd_controller")==0)
           {
             ROS_INFO("lcd_controller started");
             controllersList_.push_back(new CLCDController((*it).first, this, nh));
+            //printf("arranco el timer");
+            ipTimer_=nh_.createTimer(ros::Duration(5),&CSerialController::ipTimerCallback,this);
+            //printf("timer arrancado");
           }
           else if(type.compare("imu_controller")==0)
           {
@@ -208,8 +222,8 @@ CSerialController::CSerialController(std::string port1, int baud1, std::string p
 CSerialController::~CSerialController()
 {
   std::string goodbye;
-  goodbye.push_back(12);        //Code that cleans the LCD screen
-  goodbye+="QBO is shutting down...";
+  //goodbye.push_back(12);        //Code that cleans the LCD screen
+  goodbye+="Waiting for PC        ";
   this->setLCD(goodbye);
   
   std::map< std::string, CServo * >::iterator it;
@@ -223,6 +237,7 @@ CSerialController::~CSerialController()
     delete controllersList_.back();
     controllersList_.pop_back();
   }
+  sensorsController_=NULL;
 }
 
 
@@ -247,13 +262,74 @@ void CSerialController::timerCallback(const ros::TimerEvent& e) {
   joint_pub_.publish(joint_state);
 }
 
+bool sendHostname=true;
+void CSerialController::ipTimerCallback(const ros::TimerEvent& e)
+{
+  struct ifaddrs * ifAddrStruct=NULL;
+  struct ifaddrs * ifa=NULL;
+  void * tmpAddrPtr=NULL;
+
+  getifaddrs(&ifAddrStruct);
+  bool ip_found=false;
+
+  setLCD(std::string("PC connected        "));
+/*
+  char hostname[40];
+  unsigned int hostnameLen=40;
+
+  gethostname(hostname,hostnameLen);
+  printf("Hostname: %s\n",hostname);
+*/
+  if(sendHostname)
+  {
+    char hostname[40];
+    unsigned int hostnameLen=40;
+  
+    gethostname(hostname,hostnameLen);
+    //printf("Hostname: %s\n",hostname);
+    std::string host_string("1H: ");
+    host_string+=std::string(hostname);
+    setLCD(host_string);
+  }
+  else
+  {
+    for (ifa = ifAddrStruct; ifa != NULL; ifa = ifa->ifa_next)
+    {
+      if (ifa ->ifa_addr->sa_family==AF_INET)
+      { // check it is IP4
+        // is a valid IP4 Address
+        tmpAddrPtr=&((struct sockaddr_in *)ifa->ifa_addr)->sin_addr;
+        char addressBuffer[INET_ADDRSTRLEN];
+        inet_ntop(AF_INET, tmpAddrPtr, addressBuffer, INET_ADDRSTRLEN);
+        std::string ip_string;
+        if(strncmp(ifa->ifa_name,"eth",3)==0 || strncmp(ifa->ifa_name,"wlan",4)==0 || strncmp(ifa->ifa_name,"ath",3)==0)
+        {
+          //printf("%s IP Address %s\n", ifa->ifa_name, addressBuffer);
+          ip_string="1IP: "+std::string(addressBuffer)+"        ";
+          setLCD(ip_string);
+          ip_found=true;
+          break;
+        }
+      }
+    }
+    if(!ip_found)
+    {
+      setLCD(std::string("1IP: Not connected    "));
+    }
+  }
+  if (ifAddrStruct!=NULL) freeifaddrs(ifAddrStruct);
+  sendHostname=!sendHostname;
+}
+
 bool CSerialController::qboTestService(qbo_arduqbo::Test::Request  &req, qbo_arduqbo::Test::Response &res)
 {
   //estado de qboard1
   if(boards_.count("base")==1)
   {
+    std::set<uint8_t> configuredSrfs = sensorsController_->getConfiguredSrfs();
     std::map<uint8_t,unsigned short> sensorsDistances;
     uint8_t I2cDevicesState=0;
+    uint8_t motorsState=0;
     res.Qboard1=true;
     getDistanceSensors(sensorsDistances);
     std::map<uint8_t,unsigned short>::iterator p;
@@ -263,14 +339,27 @@ bool CSerialController::qboTestService(qbo_arduqbo::Test::Request  &req, qbo_ard
     {
       res.SRFAddress.push_back(p->first);
       i++;
+      if(configuredSrfs.count(p->first)>0)
+      {
+          configuredSrfs.erase(p->first);
+      }
     }
     res.SRFcount=i;
+    std::set<uint8_t>::iterator setIt;
+    res.SRFNotFound.clear();
+    for(setIt = configuredSrfs.begin(); setIt != configuredSrfs.end(); setIt++)
+    {
+        res.SRFNotFound.push_back(*setIt);
+    }
     //res.SRFAddress=0;
     getI2cDevicesState(I2cDevicesState);
+    getMotorsState(motorsState);
     res.Gyroscope=I2cDevicesState&0x01;
     res.Accelerometer=I2cDevicesState&0x02;
     res.LCD=I2cDevicesState&0x04;
     res.Qboard3=I2cDevicesState&0x08;
+    res.rightMotor=motorsState&0x01;
+    res.leftMotor=motorsState&0x02;
     //Obtener SRFCount
     //sus direcciones
     //gyro, acel y lcd

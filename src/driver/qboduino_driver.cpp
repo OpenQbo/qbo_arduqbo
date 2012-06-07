@@ -27,8 +27,16 @@
 CQboduinoDriver::CQboduinoDriver(std::string port1, int baud1, std::string port2, int baud2, float timeout1, float timeout2) :
     firstDevice(), secondDevice(), timeout1_(timeout1*1000), timeout2_(timeout2*1000)
 {
+    try{
     firstDevice.open(port1.c_str(),baud1);
+    }
+    catch (...)
+{}
+
+    try{
     secondDevice.open(port2.c_str(),baud2);
+    }
+    catch(...){}
     usleep(5500000);
     if(!firstDevice.portOpen()) {
       std::cout << "Unable to open " << port1 << " port" << std::endl;
@@ -494,11 +502,11 @@ int CQboduinoDriver::resetStall()
     return code;
 }
 
-int CQboduinoDriver::getState(uint8_t& state)
+int CQboduinoDriver::getMotorsState(uint8_t& state)
 {
     std::vector<dataUnion> data,sent;
 
-    CComando comand=comandosSet_.resetStall;
+    CComando comand=comandosSet_.getMotorsState;
     int code=lockAndSendComand("base",comand,data,sent);
     if (code<0) return code;
     state=(uint8_t)data[0].b;

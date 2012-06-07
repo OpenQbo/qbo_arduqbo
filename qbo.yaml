@@ -1,11 +1,11 @@
 port1: /dev/ttyUSB0
 port2: /dev/ttyUSB1
-rate: 15.0
+rate: 6.0
 controllers: {
     "j_con": {
         type: joint_controller,
         joints: ["head_pan_joint","head_tilt_joint"],
-        rate: 15.0,
+        rate: 6.0,
         topic: /cmd_joints
     },
     "b_con": {

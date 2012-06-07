@@ -20,9 +20,12 @@
 ---
 int8 SRFcount
 int16[] SRFAddress
+int16[] SRFNotFound
 bool Gyroscope
 bool Accelerometer
 bool LCD
 bool Qboard3
 bool Qboard1
 bool Qboard2
+bool rightMotor
+bool leftMotor

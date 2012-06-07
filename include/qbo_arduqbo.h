@@ -29,6 +29,7 @@
 #include <driver/qboduino_driver.h>
 #include <driver/arduqbo_instructions.h>
 #include <controllers/controllers_class.h>
+#include <controllers/srf10_controller.h>
 #include <servos.h>
 #include <std_msgs/String.h>
 #include <map>
@@ -48,14 +49,17 @@ private:
   ros::NodeHandle nh_;
 
   ros::Timer timer_;
+  ros::Timer ipTimer_;
 
   std::map<std::string, CServo *> servosList_;
   std::vector<std::string> servosNamesList_;
   std::vector<CController *> controllersList_;
+  CSrf10Controller* sensorsController_;
 
   ros::Publisher joint_pub_;
 
   void timerCallback(const ros::TimerEvent& e);
+  void ipTimerCallback(const ros::TimerEvent& e);
   ros::ServiceServer qboTestService_;
 };
 
