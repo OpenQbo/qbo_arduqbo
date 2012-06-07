@@ -1,6 +1,6 @@
 # Software License Agreement (LGPL v2.1 License)
 #
-# Copyright (c) 2012 OpenQbo, Inc.
+# Copyright (c) 2012 Thecorpora, Inc.
 #
 # This library is free software; you can redistribute it and/or modify 
 # it under the terms of the GNU Lesser General Public License as published
@@ -17,7 +17,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
 # MA 02110-1301, USA.# Software License Agreement (LGPL v2.1 License)
 #
-# Copyright (c) 2012 OpenQbo, Inc.
+# Copyright (c) 2012 Thecorpora, Inc.
 #
 # This library is free software; you can redistribute it and/or modify 
 # it under the terms of the GNU Lesser General Public License as published
