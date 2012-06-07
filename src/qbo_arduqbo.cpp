@@ -197,9 +197,7 @@ CSerialController::CSerialController(std::string port1, int baud1, std::string p
           {
             ROS_INFO("lcd_controller started");
             controllersList_.push_back(new CLCDController((*it).first, this, nh));
-            //printf("arranco el timer");
             ipTimer_=nh_.createTimer(ros::Duration(5),&CSerialController::ipTimerCallback,this);
-            //printf("timer arrancado");
           }
           else if(type.compare("imu_controller")==0)
           {
