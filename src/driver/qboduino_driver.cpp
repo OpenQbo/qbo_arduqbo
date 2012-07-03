@@ -245,20 +245,6 @@ int CQboduinoDriver::sendComand(std::string board, CComando& comand, std::vector
         return -6;
     if(comand.deserialize(ind, response)<0)
     {
-        /*
-        std::cout << "Salida" << std::endl;
-        for (int i=0;i<oud.size();i++)
-        {
-            std::cout << std::hex << (int)oud[i] << "   ";
-        }
-        std::cout << std::endl;
-        std::cout << "Entrada" << std::endl;
-        for (int i=0;i<ind.size();i++)
-        {
-            std::cout << std::hex << (int)ind[i] << "   ";
-        }
-        std::cout << std::endl;
-        */
         return -7;
     }
     return 1;

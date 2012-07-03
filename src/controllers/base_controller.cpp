@@ -38,12 +38,8 @@ CBaseController::CBaseController(std::string name, CQboduinoDriver *device_p, ro
     x_ = 0.0;                  // position in xy plane
     y_ = 0.0;
     th_ = 0.0;
-    //vel_sub_ = nh_.subscribe<turtlesim::Velocity>("command_velocity", 1, &CBaseController::commandCallback, this);
     std::string topic, odom_topic;
-    //double rate;
-    //std::string temp="controllers/"+name+"/topic";
     nh.param("controllers/"+name+"/topic", topic, std::string("cmd_vel"));
-    //temp="controllers/"+name+"/odom_topic";
     nh.param("controllers/"+name+"/odom_topic", odom_topic, std::string("odom"));
     nh.param("controllers/"+name+"/rate", rate_, 15.0);
     nh.param("controllers/"+name+"/tf_odom_broadcast", is_odom_broadcast_enabled_, true);
@@ -51,7 +47,6 @@ CBaseController::CBaseController(std::string name, CQboduinoDriver *device_p, ro
     odom_pub_ = nh.advertise<nav_msgs::Odometry>(odom_topic, 1);
     stall_unlock_service_ = nh.advertiseService("unlock_motors_stall", &CBaseController::unlockStall,this);
     then_=ros::Time::now();
-    //std::cout << rate_ << std::endl;
     timer_=nh.createTimer(ros::Duration(1/rate_),&CBaseController::timerCallback,this);
     odom_.header.stamp = then_;
     odom_.header.frame_id = "odom";
@@ -90,8 +85,7 @@ void CBaseController::twistCallback(const geometry_msgs::Twist::ConstPtr& msg)
     v_linear_=(float)msg->linear.x;
     v_angular_=(float)msg->angular.z;
     v_dirty_=true;
-    // clean up and log values                  
-    //rospy.logdebug("Twist move: "+str(self.v_linear)+","+str(self.v_angular))
+    // clean up and log values
     ROS_DEBUG_STREAM("Twist move: linear=" << v_linear_ << " angular=" << v_angular_);
 }
 

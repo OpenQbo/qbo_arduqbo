@@ -39,7 +39,7 @@
 class CSerialController : public CQboduinoDriver
 {
 public:
-  CSerialController(std::string port1="/dev/ttyUSB0", int baud1=115200, std::string port2="/dev/ttyUSB1", int baud2=115200, float timeout1=0.05, float timeout2=0.05, double rate=15, ros::NodeHandle nh=ros::NodeHandle("~"));
+  CSerialController(std::string port1="/dev/ttyUSB0", int baud1=115200, std::string port2="/dev/ttyUSB1", int baud2=115200, float timeout1=0.05, float timeout2=0.05, double rate=15, ros::NodeHandle nh=ros::NodeHandle("~"), std::string dmxPort="/dev/ttyUSB2");
   ~CSerialController();
 
   bool qboTestService(qbo_arduqbo::Test::Request  &req, qbo_arduqbo::Test::Response &res);
@@ -47,6 +47,7 @@ public:
 private:
   double rate_;
   ros::NodeHandle nh_;
+  std::string dmxPort_;
 
   ros::Timer timer_;
   ros::Timer ipTimer_;

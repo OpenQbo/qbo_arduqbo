@@ -36,9 +36,7 @@
 class CJointController : public CController
 {
     public:
-        
         CJointController(std::string name, CQboduinoDriver *device_p, ros::NodeHandle& nh, std::map<std::string,CServo *>& servos);
-        //sensor_msgs::JointState joint_state;
     
     protected:
         

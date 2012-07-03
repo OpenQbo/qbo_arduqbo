@@ -59,7 +59,7 @@ controllers: {
 
 controlledservos: {
     head_pan_joint: {id: 1, invert: true, max_angle_degrees: 66.0, min_angle_degrees: -66.0, neutral: 1460},
-    head_tilt_joint: {id: 2, invert: true, max_angle_degrees: 20.0, min_angle_degrees: -37.8, neutral: 1250},
+    head_tilt_joint: {id: 2, invert: true, max_angle_degrees: 5.0, min_angle_degrees: -42.8, neutral: 1400},
 }
 
 uncontrolledservos: {

@@ -37,10 +37,9 @@ CJointController::CJointController(std::string name, CQboduinoDriver *device_p, 
     nh.param("controllers/"+name+"/topic", topic, std::string("cmd_joints"));
     nh.param("controllers/"+name+"/rate", rate_, 15.0);
     joint_sub_ = nh.subscribe<sensor_msgs::JointState>(topic, 10, &CJointController::jointCallback, this);
-    //std::cout << rate_ << std::endl;
     timer_=nh.createTimer(ros::Duration(1/rate_),&CJointController::timerCallback,this);
 }
-//sensor_msgs::JointState joint_state;
+
 void CJointController::jointCallback(const sensor_msgs::JointState::ConstPtr& msg)
 {
     ROS_DEBUG_STREAM("Joint move");

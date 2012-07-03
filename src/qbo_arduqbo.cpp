@@ -53,9 +53,10 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
+#include <dynamixel.h>
 
-CSerialController::CSerialController(std::string port1, int baud1, std::string port2, int baud2, float timeout1, float timeout2, double rate, ros::NodeHandle nh) :
-  CQboduinoDriver(port1, baud1, port2, baud2, timeout1, timeout2), rate_(rate), nh_(nh)
+CSerialController::CSerialController(std::string port1, int baud1, std::string port2, int baud2, float timeout1, float timeout2, double rate, ros::NodeHandle nh, std::string dmxPort) :
+  CQboduinoDriver(port1, baud1, port2, baud2, timeout1, timeout2), rate_(rate), nh_(nh), dmxPort_(dmxPort)
 {
   //Check parameters in ROS_PARAM and start controllers
   //Advertise the test service
@@ -74,13 +75,13 @@ CSerialController::CSerialController(std::string port1, int baud1, std::string p
       value=servos;
       for(it=value.begin();it!=value.end();it++)
       {
-	ROS_ASSERT((*it).second.getType() == XmlRpc::XmlRpcValue::TypeStruct);
-	servosList_[(*it).first]=new ControledServo((*it).first,this);
-	servosNamesList_.push_back((*it).first);
-	//Set servos parameters
-	servosList_[(*it).first]->setParams((*it).second);
-	servosList_[(*it).first]->setAngle(0);
-	ROS_INFO_STREAM("Servo pseudocontrolado " << (*it).first << " started");
+        ROS_ASSERT((*it).second.getType() == XmlRpc::XmlRpcValue::TypeStruct);
+        servosList_[(*it).first]=new ControledServo((*it).first,this);
+        servosNamesList_.push_back((*it).first);
+        //Set servos parameters
+        servosList_[(*it).first]->setParams((*it).second);
+        servosList_[(*it).first]->setAngle(0);
+        ROS_INFO_STREAM("Servo pseudocontrolado " << (*it).first << " started");
       }
     }
     //Un-controlled servos
@@ -94,13 +95,42 @@ CSerialController::CSerialController(std::string port1, int baud1, std::string p
       value=servos;
       for(it=value.begin();it!=value.end();it++)
       {
-	ROS_ASSERT((*it).second.getType() == XmlRpc::XmlRpcValue::TypeStruct);
-	servosList_[(*it).first]=new CServo((*it).first,this);
-	servosNamesList_.push_back((*it).first);
+        ROS_ASSERT((*it).second.getType() == XmlRpc::XmlRpcValue::TypeStruct);
+        servosList_[(*it).first]=new CServo((*it).first,this);
+        servosNamesList_.push_back((*it).first);
         //Set servos parameters
-	servosList_[(*it).first]->setParams((*it).second);
-	servosList_[(*it).first]->setAngle(0);
-	ROS_INFO_STREAM("Servo " << (*it).first << " started");
+        servosList_[(*it).first]->setParams((*it).second);
+        servosList_[(*it).first]->setAngle(0);
+        ROS_INFO_STREAM("Servo " << (*it).first << " started");
+      }
+    }
+    if(nh_.hasParam("dynamixelservo"))
+    {
+      //Start dynamixel port
+      if( dxl_initialize(const_cast<char *>(dmxPort_.c_str()), 1) == 0 )
+      {
+          ROS_ERROR( "Failed to open dynamixel controller!\n" );
+      }
+      else
+      {
+          ROS_INFO( "Succeed to open dynamixel controller!\n" );
+          std::map< std::string, XmlRpc::XmlRpcValue >::iterator it;
+          std::map< std::string, XmlRpc::XmlRpcValue > value;
+          XmlRpc::MyXmlRpcValue servos;
+          nh_.getParam("dynamixelservo", servos);
+          ROS_ASSERT(servos.getType() == XmlRpc::XmlRpcValue::TypeStruct);
+          value=servos;
+          for(it=value.begin();it!=value.end();it++)
+          {
+            ROS_ASSERT((*it).second.getType() == XmlRpc::XmlRpcValue::TypeStruct);
+            servosList_[(*it).first]=new DynamixelServo(nh,(*it).first,this);
+            servosNamesList_.push_back((*it).first);
+            //Set servos parameters
+            ((DynamixelServo*)servosList_[(*it).first])->changeTorque(254);
+            servosList_[(*it).first]->setParams((*it).second);
+            servosList_[(*it).first]->setAngle(0,0.3);
+            ROS_INFO_STREAM("Dynamixel " << (*it).first << " started");
+          }
       }
     }
     //Check for controllers
@@ -114,36 +144,34 @@ CSerialController::CSerialController(std::string port1, int baud1, std::string p
       value=controllers;
       for(it=value.begin();it!=value.end();it++)
       {
-	ROS_ASSERT((*it).second.getType() == XmlRpc::XmlRpcValue::TypeStruct);
-	XmlRpc::XmlRpcValue controller_params=(*it).second;
-	if(controller_params.hasMember("type"))
-	{
-	  std::string type=controller_params["type"];
-	  //Joint controller
-	  if(type.compare("joint_controller")==0)
-	  {
-	    ROS_INFO("joint_controller started");
-	    controllersList_.push_back(new CJointController((*it).first, this, nh, servosList_));
-	  }
-	  //Mouth controller
-	  else if(type.compare("mouth_controller")==0)
-	  {
-	    ROS_INFO("mouth_controller started");
-	    controllersList_.push_back(new CMouthController((*it).first, this, nh));
-	  }
+        ROS_ASSERT((*it).second.getType() == XmlRpc::XmlRpcValue::TypeStruct);
+        XmlRpc::XmlRpcValue controller_params=(*it).second;
+        if(controller_params.hasMember("type"))
+        {
+          std::string type=controller_params["type"];
+          //Joint controller
+          if(type.compare("joint_controller")==0)
+          {
+            ROS_INFO("joint_controller started");
+            controllersList_.push_back(new CJointController((*it).first, this, nh, servosList_));
+          }
+          //Mouth controller
+          else if(type.compare("mouth_controller")==0)
+          {
+            ROS_INFO("mouth_controller started");
+            controllersList_.push_back(new CMouthController((*it).first, this, nh));
+          }
           else if(type.compare("nose_controller")==0)
           {
             ROS_INFO("nose_controller started");
-            //std::cout << "mouth_controller encontrado" << std::endl;
             controllersList_.push_back(new CNoseController((*it).first, this, nh));
           }
-	  else if(type.compare("mics_controller")==0)
-	  {
-	    ROS_INFO("mics_controller started");
-	    //std::cout << "mouth_controller encontrado" << std::endl;
-	    controllersList_.push_back(new CMicsController((*it).first, this, nh));
-	  }
-	}
+          else if(type.compare("mics_controller")==0)
+          {
+            ROS_INFO("mics_controller started");
+            controllersList_.push_back(new CMicsController((*it).first, this, nh));
+          }
+        }
       }
     }
     //The following lines setup the joint state publisher at the given rate
@@ -151,9 +179,6 @@ CSerialController::CSerialController(std::string port1, int baud1, std::string p
     nh_.param("joint_states_topic", topic, std::string("joint_states"));
     joint_pub_ = nh_.advertise<sensor_msgs::JointState>(topic, 1);
     timer_=nh_.createTimer(ros::Duration(1/rate_),&CSerialController::timerCallback,this);
-    //printf("arranco el timer");
-    //ipTimer_=nh_.createTimer(ros::Duration(10),&CSerialController::ipTimerCallback,this);
-    //printf("timer arrancado");
   }
   //Check for controllers that are governed by the base board
   if(boards_.count("base")==1)
@@ -168,50 +193,49 @@ CSerialController::CSerialController(std::string port1, int baud1, std::string p
       value=controllers;
       for(it=value.begin();it!=value.end();it++)
       {
-	ROS_ASSERT((*it).second.getType() == XmlRpc::XmlRpcValue::TypeStruct);
-	XmlRpc::XmlRpcValue controller_params=(*it).second;
-	if(controller_params.hasMember("type"))
-	{
-	  std::string type=controller_params["type"];
-	  //Base controller (speed and odometry)
-	  if(type.compare("base_controller")==0)
-	  {
-	    ROS_INFO("base_controller started");
-	    controllersList_.push_back(new CBaseController((*it).first, this, nh));
-	  }
-	  //Battery controller
-	  else if(type.compare("battery_controller")==0)
-	  {
-	    ROS_INFO("battery_controller started");
-	    controllersList_.push_back(new CBatteryController((*it).first, this, nh));
-	  }
-	  //Sensors controller (I2C sonar sensors and ADC readings)
-	  else if(type.compare("sensors_controller")==0)
-	  {
-	    ROS_INFO("sensors_controller started");
+        ROS_ASSERT((*it).second.getType() == XmlRpc::XmlRpcValue::TypeStruct);
+        XmlRpc::XmlRpcValue controller_params=(*it).second;
+        if(controller_params.hasMember("type"))
+        {
+          std::string type=controller_params["type"];
+          //Base controller (speed and odometry)
+          if(type.compare("base_controller")==0)
+          {
+            ROS_INFO("base_controller started");
+            controllersList_.push_back(new CBaseController((*it).first, this, nh));
+          }
+          //Battery controller
+          else if(type.compare("battery_controller")==0)
+          {
+            ROS_INFO("battery_controller started");
+            controllersList_.push_back(new CBatteryController((*it).first, this, nh));
+          }
+          //Sensors controller (I2C sonar sensors and ADC readings)
+          else if(type.compare("sensors_controller")==0)
+          {
+            ROS_INFO("sensors_controller started");
             sensorsController_ = new CSrf10Controller((*it).first, this, nh);
-	    controllersList_.push_back(sensorsController_);
-	  }
-	  //Back LCD controller
+            controllersList_.push_back(sensorsController_);
+          }
+          //Back LCD controller
           else if(type.compare("lcd_controller")==0)
           {
             ROS_INFO("lcd_controller started");
             controllersList_.push_back(new CLCDController((*it).first, this, nh));
             ipTimer_=nh_.createTimer(ros::Duration(5),&CSerialController::ipTimerCallback,this);
           }
+          //IMU board controller
           else if(type.compare("imu_controller")==0)
           {
             ROS_INFO("imu_controller started");
-            //std::cout << "imu_controller encontrado" << std::endl;
             controllersList_.push_back(new CImuController((*it).first, this, nh));
           }
           else if(type.compare("irs_controller")==0)
           {
             ROS_INFO("irs_controller started");
-            //std::cout << "imu_controller encontrado" << std::endl;
             controllersList_.push_back(new CInfraRedsController((*it).first, this, nh));
           }
-	}
+        }
       }
     }
   } 
@@ -242,9 +266,6 @@ CSerialController::~CSerialController()
 void CSerialController::timerCallback(const ros::TimerEvent& e) {
   sensor_msgs::JointState joint_state;
   int servos_count=servosList_.size();
-  //joint_state.name.resize(servos_count);
-  //joint_state.position.resize(servos_count);
-  //joint_state.velocity.resize(servos_count);
   for(int i=0;i<servos_count;i++)
   {
     float angle=servosList_[servosNamesList_[i]]->getAngle();
@@ -321,7 +342,7 @@ void CSerialController::ipTimerCallback(const ros::TimerEvent& e)
 
 bool CSerialController::qboTestService(qbo_arduqbo::Test::Request  &req, qbo_arduqbo::Test::Response &res)
 {
-  //estado de qboard1
+  //qboard1 state
   if(boards_.count("base")==1)
   {
     std::set<uint8_t> configuredSrfs = sensorsController_->getConfiguredSrfs();
@@ -349,7 +370,6 @@ bool CSerialController::qboTestService(qbo_arduqbo::Test::Request  &req, qbo_ard
     {
         res.SRFNotFound.push_back(*setIt);
     }
-    //res.SRFAddress=0;
     getI2cDevicesState(I2cDevicesState);
     getMotorsState(motorsState);
     res.Gyroscope=I2cDevicesState&0x01;
@@ -358,21 +378,17 @@ bool CSerialController::qboTestService(qbo_arduqbo::Test::Request  &req, qbo_ard
     res.Qboard3=I2cDevicesState&0x08;
     res.rightMotor=motorsState&0x01;
     res.leftMotor=motorsState&0x02;
-    //Obtener SRFCount
-    //sus direcciones
-    //gyro, acel y lcd
   }
   else
   {
     res.Qboard1=true;
-    //Obtener SRFCount
     res.SRFcount=0;
     res.Gyroscope=false;
     res.Accelerometer=false;
     res.LCD=false;
     res.Qboard3=false;
   }
-  //estado de qboard2
+  //qboard2 state
   if(boards_.count("head")==1)
     res.Qboard2=true;
   else
@@ -385,7 +401,7 @@ int main(int argc, char** argv)
 {
   ros::init(argc, argv, "serial_comm_node");
   ros::NodeHandle n("~");
-  std::string port1,port2;
+  std::string port1,port2,dmxPort;
   int baud1,baud2;
   double timeout1,timeout2,rate;
   //Read serial port configuration
@@ -399,8 +415,9 @@ int main(int argc, char** argv)
   n.param("timeout2", timeout2, 0.01);
   //Read joint state publishing rate
   n.param("rate", rate, 15.0);
-  CSerialController serial_controller(port1,baud1,port2,baud2,timeout1,timeout2,rate,n);
-  ROS_INFO("Ready to send messages to the Arduino.");
+  n.param("dmxPort", dmxPort, std::string("/dev/ttyUSB2"));
+  CSerialController serial_controller(port1,baud1,port2,baud2,timeout1,timeout2,rate,n,dmxPort);
+  ROS_INFO("Ready to send messages to the QBoards.");
   ros::spin();
 
   return 0;

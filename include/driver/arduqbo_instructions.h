@@ -61,7 +61,6 @@ class ComandosSet
         CComando getEncoders;
         CComando distanceSensors;
         CComando distanceSensor;
-        //define SET_AUTOUPDATE_SRFS 0x72
         CComando setAutoupdateSensors;
         CComando adcReads;
         CComando lcd;

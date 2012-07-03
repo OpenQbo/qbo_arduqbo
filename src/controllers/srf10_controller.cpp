@@ -54,35 +54,21 @@ void CDistanceSensor::publish(unsigned int readedValue, ros::Time time)
     float distance=0;
     if(type_.compare("srf10")==0)
     {
-	distance=((float)readedValue)/100;
-  //std::cout << "srf10 " << distance << std::endl;
+        distance=((float)readedValue)/100;
     }
     else if(type_.compare("gp2d120")==0)
     {
-	distance=(2914 / ((float)readedValue + 5)) - 1;
-  //std::cout << "gp2d120 " << distance << std::endl;
+        distance=(2914 / ((float)readedValue + 5)) - 1;
     }
     else if(type_.compare("gp2d12")==0)
     {
-	if (readedValue<3)
-	    distance=-1;
-	else
-	    distance=(6787.0 /((float)readedValue - 3.0)) - 4.0;
-      //std::cout << "gp2d12 " << distance << std::endl;
+        if (readedValue<3)
+            distance=-1;
+        else
+            distance=(6787.0 /((float)readedValue - 3.0)) - 4.0;
     }
     else if(type_.compare("GP2Y0A21YK")==0)
     {
-            //distance=(6787.0 /((float)readedValue - 3.0)) - 4.0;
-       //double x; 
-       //double y; 
-       //double ans; 
-       //x = calcu_data;  /* A/D data = Voltage V*/ 
-       //y = -1.2027; 
-       //ans = pow(x, y);  /* ans = x^(-1.2027) */ 
-       //X_voltage = ans; 
-       //// convert from voltage to distance) 
-       //distance = 27.22 * (X_voltage);
-       
        distance = 12343.85 * pow((float)readedValue,-1.15);
     }
     cloud_.points[0].x=distance;
@@ -113,7 +99,7 @@ CSrf10Controller::CSrf10Controller(std::string name, CQboduinoDriver *device_p, 
       value=sensors;
       for(it=value.begin();it!=value.end();it++)
       {
-	ROS_ASSERT((*it).second.getType() == XmlRpc::XmlRpcValue::TypeStruct);
+        ROS_ASSERT((*it).second.getType() == XmlRpc::XmlRpcValue::TypeStruct);
         if(!nh.hasParam("controllers/"+name+"/sensors/front/"+(*it).first+"/address"))
         {
             ROS_WARN_STREAM("You need to set the address atribute for the sensor " << (*it).first);
@@ -125,24 +111,24 @@ CSrf10Controller::CSrf10Controller(std::string name, CQboduinoDriver *device_p, 
             continue;
         }
         int address;
-	std::string type;
+        std::string type;
         std::string frame_id;
         std::string sensor_topic;
         nh.getParam("controllers/"+name+"/sensors/front/"+(*it).first+"/address", address);
         nh.getParam("controllers/"+name+"/sensors/front/"+(*it).first+"/type", type);
         nh.param("controllers/"+name+"/sensors/front/"+(*it).first+"/frame_id", frame_id, std::string(""));
         nh.param("controllers/"+name+"/sensors/front/"+(*it).first+"/topic", sensor_topic, topic+"/"+(*it).first);
-	if (type.compare("srf10")==0)
-	{
-	    srf10Sensors_[(uint8_t)address]=new CDistanceSensor((*it).first, (uint8_t)address, sensor_topic, nh, type, frame_id);
-	    srf10SensorsUpdateGroup_[(uint8_t)address]=1;
-	}
-	else if (type.compare("gp2d12")==0 || type.compare("gp2d120")==0 || type.compare("GP2Y0A21YK")==0)
-	{
-	    adcSensors_[(uint8_t)address]=new CDistanceSensor((*it).first, (uint8_t)address, sensor_topic, nh, type, frame_id);
-	    adcSensorsAddresses_.push_back((uint8_t)address);
-	}
-	ROS_INFO_STREAM("Sensor " << (*it).first << " of type " << type << " inicializado");
+        if (type.compare("srf10")==0)
+        {
+            srf10Sensors_[(uint8_t)address]=new CDistanceSensor((*it).first, (uint8_t)address, sensor_topic, nh, type, frame_id);
+            srf10SensorsUpdateGroup_[(uint8_t)address]=1;
+        }
+        else if (type.compare("gp2d12")==0 || type.compare("gp2d120")==0 || type.compare("GP2Y0A21YK")==0)
+        {
+            adcSensors_[(uint8_t)address]=new CDistanceSensor((*it).first, (uint8_t)address, sensor_topic, nh, type, frame_id);
+            adcSensorsAddresses_.push_back((uint8_t)address);
+        }
+        ROS_INFO_STREAM("Sensor " << (*it).first << " of type " << type << " inicializado");
       }
     }
     if(nh.hasParam("controllers/"+name+"/sensors/back"))
@@ -155,7 +141,7 @@ CSrf10Controller::CSrf10Controller(std::string name, CQboduinoDriver *device_p, 
       value=sensors;
       for(it=value.begin();it!=value.end();it++)
       {
-	ROS_ASSERT((*it).second.getType() == XmlRpc::XmlRpcValue::TypeStruct);
+        ROS_ASSERT((*it).second.getType() == XmlRpc::XmlRpcValue::TypeStruct);
         if(!nh.hasParam("controllers/"+name+"/sensors/back/"+(*it).first+"/address"))
         {
             ROS_WARN_STREAM("You need to set the address atribute for the sensor " << (*it).first);
@@ -167,24 +153,24 @@ CSrf10Controller::CSrf10Controller(std::string name, CQboduinoDriver *device_p, 
             continue;
         }
         int address;
-	std::string type;
+        std::string type;
         std::string frame_id;
         std::string sensor_topic;
         nh.getParam("controllers/"+name+"/sensors/back/"+(*it).first+"/address", address);
         nh.getParam("controllers/"+name+"/sensors/back/"+(*it).first+"/type", type);
         nh.param("controllers/"+name+"/sensors/back/"+(*it).first+"/frame_id", frame_id, std::string(""));
         nh.param("controllers/"+name+"/sensors/back/"+(*it).first+"/topic", sensor_topic, topic+"/"+(*it).first);
-	if (type.compare("srf10")==0)
-	{
-	    srf10Sensors_[(uint8_t)address]=new CDistanceSensor((*it).first, (uint8_t)address, sensor_topic, nh, type, frame_id);
-	    srf10SensorsUpdateGroup_[(uint8_t)address]=1;
-	}
-	else if (type.compare("gp2d12")==0 || type.compare("gp2d120")==0  || type.compare("GP2Y0A21YK")==0)
-	{
-	    adcSensors_[(uint8_t)address]=new CDistanceSensor((*it).first, (uint8_t)address, sensor_topic, nh, type, frame_id);
-	    adcSensorsAddresses_.push_back((uint8_t)address);
-	}
-	ROS_INFO_STREAM("Sensor " << (*it).first << " of type " << type << " inicializado");
+        if (type.compare("srf10")==0)
+        {
+            srf10Sensors_[(uint8_t)address]=new CDistanceSensor((*it).first, (uint8_t)address, sensor_topic, nh, type, frame_id);
+            srf10SensorsUpdateGroup_[(uint8_t)address]=1;
+        }
+        else if (type.compare("gp2d12")==0 || type.compare("gp2d120")==0  || type.compare("GP2Y0A21YK")==0)
+        {
+            adcSensors_[(uint8_t)address]=new CDistanceSensor((*it).first, (uint8_t)address, sensor_topic, nh, type, frame_id);
+            adcSensorsAddresses_.push_back((uint8_t)address);
+        }
+        ROS_INFO_STREAM("Sensor " << (*it).first << " of type " << type << " inicializado");
       }
     }
     if(nh.hasParam("controllers/"+name+"/sensors/floor"))
@@ -197,7 +183,7 @@ CSrf10Controller::CSrf10Controller(std::string name, CQboduinoDriver *device_p, 
       value=sensors;
       for(it=value.begin();it!=value.end();it++)
       {
-	ROS_ASSERT((*it).second.getType() == XmlRpc::XmlRpcValue::TypeStruct);
+        ROS_ASSERT((*it).second.getType() == XmlRpc::XmlRpcValue::TypeStruct);
         if(!nh.hasParam("controllers/"+name+"/sensors/floor/"+(*it).first+"/address"))
         {
             ROS_WARN_STREAM("You need to set the address atribute for the sensor " << (*it).first);
@@ -209,27 +195,27 @@ CSrf10Controller::CSrf10Controller(std::string name, CQboduinoDriver *device_p, 
             continue;
         }
         int address;
-	std::string type;
+        std::string type;
         std::string frame_id;
         std::string sensor_topic;
         nh.getParam("controllers/"+name+"/sensors/floor/"+(*it).first+"/address", address);
         nh.getParam("controllers/"+name+"/sensors/floor/"+(*it).first+"/type", type);
         nh.param("controllers/"+name+"/sensors/floor/"+(*it).first+"/frame_id", frame_id, std::string(""));
         nh.param("controllers/"+name+"/sensors/floor/"+(*it).first+"/topic", sensor_topic, topic+"/"+(*it).first);
-	if (type.compare("srf10")==0)
-	{
-	    ROS_WARN("srf10 sensors can only be declared at positions front or back");
-	    continue;
-	}
-	else if (type.compare("gp2d12")==0 || type.compare("gp2d120")==0  || type.compare("GP2Y0A21YK")==0)
-	{
-	    adcSensors_[(uint8_t)address]=new CDistanceSensor((*it).first, (uint8_t)address, sensor_topic, nh, type, frame_id);
-	    adcSensorsAddresses_.push_back((uint8_t)address);
-	}
-	ROS_INFO_STREAM("Sensor " << (*it).first << " of type " << type << " inicializado");
+        if (type.compare("srf10")==0)
+        {
+            ROS_WARN("srf10 sensors can only be declared at positions front or back");
+            continue;
+        }
+        else if (type.compare("gp2d12")==0 || type.compare("gp2d120")==0  || type.compare("GP2Y0A21YK")==0)
+        {
+            adcSensors_[(uint8_t)address]=new CDistanceSensor((*it).first, (uint8_t)address, sensor_topic, nh, type, frame_id);
+            adcSensorsAddresses_.push_back((uint8_t)address);
+        }
+        ROS_INFO_STREAM("Sensor " << (*it).first << " of type " << type << " inicializado");
       }
     }
-    //mando los sensores a qbo
+    //config the sensors in the QBoard1
     int code=device_p_->setAutoupdateSensors(srf10SensorsUpdateGroup_);
     if (code<0)
         ROS_WARN("Unable to activate all srf10 sensors at the base control board");
@@ -277,16 +263,16 @@ void CSrf10Controller::timerCallback(const ros::TimerEvent& e)
         ROS_ERROR("Unable to get adc sensor reads from the base control board");
     else
     {
-	if(adcReads.size()!=adcSensorsAddresses_.size())
-	    ROS_ERROR("The asked addreses and the returned reads for the adc sensors do not match");
-	else
-	{
-	    for (int i=0;i<adcSensorsAddresses_.size();i++)
-	    {
-		ROS_DEBUG_STREAM("Obtained distance " << adcReads[i] << " for adc sensor " << adcSensors_[adcSensorsAddresses_[i]]->getName() << " from the base control board");
-		adcSensors_[adcSensorsAddresses_[i]]->publish(adcReads[i],now);
-	    }
-	}
+        if(adcReads.size()!=adcSensorsAddresses_.size())
+            ROS_ERROR("The asked addreses and the returned reads for the adc sensors do not match");
+        else
+        {
+            for (int i=0;i<adcSensorsAddresses_.size();i++)
+            {
+                ROS_DEBUG_STREAM("Obtained distance " << adcReads[i] << " for adc sensor " << adcSensors_[adcSensorsAddresses_[i]]->getName() << " from the base control board");
+                adcSensors_[adcSensorsAddresses_[i]]->publish(adcReads[i],now);
+            }
+        }
     }
 }
 
