@@ -35,7 +35,10 @@
 #include <vector>
 #include <boost/thread/mutex.hpp>
 
-//Message check
+//! Checksum calculation variable.
+/*!
+  This variable is used in the message checksum calculation function.
+*/
 const uint8_t pearsondata[] = {
   0x00, 0x77, 0xee, 0x99, 0x07, 0x70, 0xe9, 0x9e, 0x0e, 0x79, 0xe0, 0x97,
   0x09, 0x7e, 0xe7, 0x90, 0x1d, 0x6a, 0xf3, 0x84, 0x1a, 0x6d, 0xf4, 0x83,
@@ -60,15 +63,38 @@ const uint8_t pearsondata[] = {
   0xbd, 0xca, 0x53, 0x24, 0xba, 0xcd, 0x54, 0x23, 0xb3, 0xc4, 0x5d, 0x2a,
   0xb4, 0xc3, 0x5a, 0x2d};
 
+//!  Message checksum calculation function. 
+/*!
+  \param key a pointer to the byte array message.
+  \param len a byte indicating the byte array message length.
+  \return The byte array message checksum
+*/
 uint8_t pearson(uint8_t *key, uint8_t len);
     
-const uint8_t INPUT_FLAG=0xFF;
-const uint8_t OUTPUT_FLAG=0xFE;
-const uint8_t INPUT_SCAPE=0xFD;
+const uint8_t INPUT_FLAG=0xFF;  /*!< This variable is the value of the byte that indicates the start of a message */
+const uint8_t OUTPUT_FLAG=0xFE; /*!< This variable is the value of the byte that indicates the end of a message */
+const uint8_t INPUT_SCAPE=0xFD; /*!< This variable is the value of the byte that indicates that the next byte is escaped */
 
+//!  The driver class. 
+/*!
+  This is the driver class where all the functions are defined.
+  Only one instance of the class can exist in the program.
+  It offers a simple set of functions to control the robot and its sensors.
+  It communicates with the Q.board1 and Q.board2 though two serial ports.
+*/
 class CQboduinoDriver
 {
 public:
+    //! Class constructor.
+    /*!
+      The constructor opens the needed serial ports and detects the Q.boards attached to them.
+      \param port1 an string indicating one of the serial ports were the Q.boards are connected.
+      \param baud1 an integer indicating the baud rate of the first serial port.
+      \param port2 an string indicating the second of the serial ports were the Q.boards are connected.
+      \param baud2 an integer indicating the baud rate of the second serial port.
+      \param timeout1 a float indicating the time that the driver waits for the Q.board connected to the first serial port to respond to a command .
+      \param timeout2 a float indicating the time that the driver waits for the Q.board connected to the second serial port to respond to a command .
+    */
     CQboduinoDriver(std::string port1="/dev/ttyUSB0", int baud1=115200, std::string port2="/dev/ttyUSB1", int baud2=115200, float timeout1=0.01, float timeout2=0.01);
     //Public functions
     int getVersion(std::string board, int& board_number, int& version);

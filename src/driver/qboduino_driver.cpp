@@ -30,8 +30,7 @@ CQboduinoDriver::CQboduinoDriver(std::string port1, int baud1, std::string port2
     try{
     firstDevice.open(port1.c_str(),baud1);
     }
-    catch (...)
-{}
+    catch (...){}
 
     try{
     secondDevice.open(port2.c_str(),baud2);

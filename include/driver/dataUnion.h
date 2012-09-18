@@ -28,13 +28,16 @@
 #include  <string>
 #include <stdint.h>
 
-//Definition of standard variable to control all available the functions
+//!  A data exange struct. 
+/*!
+  Definition of standard variable to control all available the functions.
+*/
 typedef struct DataUnion {
-   uint8_t b;
-   unsigned short h;
-   float f;
-   long l;
-   std::string s;
+   uint8_t b;         /*!< byte value. */
+   unsigned short h;  /*!< 2 byte unsigned integer value. */
+   float f;           /*!< 4 byte float value. */
+   long l;            /*!< 4 byte integer value. */
+   std::string s;     /*!< string value. */
 } dataUnion;
 
 #endif
