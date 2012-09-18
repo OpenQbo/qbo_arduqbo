@@ -73,6 +73,7 @@ class CServo
 {
     public:
         CServo(std::string name, CQboduinoDriver *device_p, bool single=false);
+        virtual ~CServo() {}
         virtual void setParams(XmlRpc::XmlRpcValue params);
         virtual void setAngle(float ang, float velocity=1);
         virtual float getAngle();
@@ -104,6 +105,7 @@ class ControledServo : public CServo
             : CServo(name,device_p,single)
         {
         }
+        ~ControledServo() {}
         virtual float getAngle();
         
 };
@@ -115,6 +117,10 @@ class DynamixelServo : public CServo
         {
           servo_state_pub_ = nh_.advertise<qbo_arduqbo::motor_state>(name_+"/state", 1);
           servo_torque_enable_srv_=nh_.advertiseService(name_+"/torqueEnable", &DynamixelServo::servoTorqueEnable, this);
+        }
+        ~DynamixelServo()
+        {
+          dxl_write_byte( id_, P_TORQUE_ENABLE, 0 );
         }
         virtual void setAngle(float ang, float velocity=1);
         virtual float getAngle();
