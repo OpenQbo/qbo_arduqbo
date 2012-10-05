@@ -378,7 +378,7 @@ int CQboduinoDriver::getBattery(float& level)
     CComando comand=comandosSet_.battery;
     int code=lockAndSendComand("base",comand,data,sent);
     if (code<0) return code;
-    level=((float)data[0].b)/10;
+    level=((float)data[0].b);
     return code;
 }
 
