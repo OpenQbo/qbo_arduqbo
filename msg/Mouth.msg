@@ -35,5 +35,4 @@
 # MA 02110-1301, USA.
 
 Header header
-uint8[3] mouthImage
-uint8 mouthColor
+bool[20] mouthImage

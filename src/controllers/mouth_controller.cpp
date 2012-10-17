@@ -26,6 +26,7 @@
 #include "ros/ros.h"
 #include "qbo_arduqbo/Mouth.h"
 #include <ros/console.h>
+#include <boost/lexical_cast.hpp>
 
 CMouthController::CMouthController(std::string name, CQboduinoDriver *device_p, ros::NodeHandle& nh) : CController(name,device_p,nh)
 {
@@ -36,10 +37,47 @@ CMouthController::CMouthController(std::string name, CQboduinoDriver *device_p, 
 
 void CMouthController::setMouth(const qbo_arduqbo::Mouth::ConstPtr& msg)
 {
-    ROS_DEBUG_STREAM("Mouth comand arrived: " << msg->mouthImage[0] << "," << msg->mouthImage[1] << "," << msg->mouthImage[2] << "," << msg->mouthColor);
-    int code=device_p_->setMouth((uint8_t)(msg->mouthImage[0]), (uint8_t)(msg->mouthImage[1]), (uint8_t)(msg->mouthImage[2]),(uint8_t)(msg->mouthColor));
+    std::string debugStream = "Mouth comand arrived: ";
+    for(uint8_t i=0;i<20;i++)
+    {
+      debugStream += boost::lexical_cast<std::string>(msg->mouthImage[i]) + " ";
+    }
+    ROS_DEBUG_STREAM(debugStream);
+    uint8_t b1,b2,b3;
+    b1=0;
+    b2=0;
+    b3=0;
+    for (uint8_t i=0;i<4;i++)
+    {
+        for (uint8_t j=0;j<5;j++)
+        {
+            uint8_t index=i*5+j;
+            uint8_t ledIndex=i*5+4-j;
+            if(index<7)
+            {
+              b1 |= ((msg->mouthImage[ledIndex]&0x01)<<(index+1));
+            }
+            else if(index<15)
+            {
+              b2 |= ((msg->mouthImage[ledIndex]&0x01)<<(index-7));
+            }
+            else
+            {
+              b3 |= ((msg->mouthImage[ledIndex]&0x01)<<(index-15));
+            }
+        }
+    }
+    int code=device_p_->setMouth(b1, b2, b3);
     if (code<0)
         ROS_ERROR("Unable to send mouth to the head control board");
     else
-        ROS_DEBUG_STREAM("Sent mouth " << msg->mouthImage[0] << "," << msg->mouthImage[1] << "," << msg->mouthImage[2] << "," << msg->mouthColor << " to the head board ");
+    {
+        debugStream = "Sent mouth: ";
+        for(uint8_t i=0;i<20;i++)
+        {
+          debugStream += boost::lexical_cast<std::string>(msg->mouthImage[i]) + " ";
+        }
+        debugStream += " to the head board ";
+        ROS_DEBUG_STREAM(debugStream);
+    }
 }

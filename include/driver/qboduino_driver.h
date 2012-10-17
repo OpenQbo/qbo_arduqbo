@@ -104,7 +104,7 @@ public:
     int getServoPosition(uint8_t idx, unsigned short& tics);
     int getHeadServosPositions(std::vector<unsigned short>& tics);
     int getEyesServosPositions(std::vector<unsigned short>& tics);
-    int setMouth(uint8_t b0, uint8_t b1, uint8_t b2, uint8_t color);
+    int setMouth(uint8_t b0, uint8_t b1, uint8_t b2);
     int setNose(uint8_t color);
     int setLCD(std::string msg);
     int getBattery(float& level);

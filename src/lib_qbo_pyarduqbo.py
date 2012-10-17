@@ -490,23 +490,23 @@ class qbo_control_client():
 
     def MICsGet(self):
         micsParamsDic={}
-        micsParamsDic['micSelected']='mic0'
+        #micsParamsDic['micSelected']='mic0'
         micsParamsDic['mic0']=self.mic0
         micsParamsDic['mic1']=self.mic1
         micsParamsDic['mic2']=self.mic2
         return micsParamsDic
         
 
-    def MICsPut(self,params):
-        if params.has_key('micSelected'):
-            if params['micSelected']=='mute':
-                pass
-            if params['micSelected']=='mic0':
-                pass
-            if params['micSelected']=='mic1':
-                pass
-            if params['micSelected']=='mic2':
-                pass
+    #def MICsPut(self,params):
+        #if params.has_key('micSelected'):
+            #if params['micSelected']=='mute':
+                #pass
+            #if params['micSelected']=='mic0':
+                #pass
+            #if params['micSelected']=='mic1':
+                #pass
+            #if params['micSelected']=='mic2':
+                #pass
         
 
 #Bateria

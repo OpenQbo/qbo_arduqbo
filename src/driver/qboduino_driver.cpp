@@ -332,7 +332,7 @@ int CQboduinoDriver::getEyesServosPositions(std::vector<unsigned short>& tics)
     tics.push_back(data[1].h);
     return code;
 }
-int CQboduinoDriver::setMouth(uint8_t b0, uint8_t b1, uint8_t b2, uint8_t color)
+int CQboduinoDriver::setMouth(uint8_t b0, uint8_t b1, uint8_t b2)
 {
     dataUnion d;
     std::vector<dataUnion> data,resp;
@@ -341,8 +341,6 @@ int CQboduinoDriver::setMouth(uint8_t b0, uint8_t b1, uint8_t b2, uint8_t color)
     d.b= b1;
     data.push_back(d);
     d.b= b2;
-    data.push_back(d);
-    d.b= color;
     data.push_back(d);
     
     CComando comand=comandosSet_.mouth;
