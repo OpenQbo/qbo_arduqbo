@@ -369,7 +369,7 @@ int CQboduinoDriver::setLCD(std::string msg)
     return (lockAndSendComand("base",comand,resp,data));
 }
 
-int CQboduinoDriver::getBattery(float& level)
+int CQboduinoDriver::getBattery(float& level, uint8_t& stat)
 {
     std::vector<dataUnion> data,sent;
     
@@ -377,6 +377,7 @@ int CQboduinoDriver::getBattery(float& level)
     int code=lockAndSendComand("base",comand,data,sent);
     if (code<0) return code;
     level=((float)data[0].b);
+    stat=((uint8_t)data[1].b);
     return code;
 }
 

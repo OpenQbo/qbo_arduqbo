@@ -39,6 +39,7 @@ class CBatteryController : public CController
     protected:
 	ros::Publisher battery_pub_;
         float level_;
+        uint8_t stat_;
         void timerCallback(const ros::TimerEvent& e);
 };
 

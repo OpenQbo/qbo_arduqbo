@@ -30,6 +30,7 @@
 CBatteryController::CBatteryController(std::string name, CQboduinoDriver *device_p, ros::NodeHandle& nh) : CController(name,device_p,nh)
 {
     level_=0;
+    stat_=0;
     std::string topic;
     nh.param("controllers/"+name+"/topic", topic, std::string("battery_state"));
     nh.param("controllers/"+name+"/rate", rate_, 15.0);
@@ -39,14 +40,15 @@ CBatteryController::CBatteryController(std::string name, CQboduinoDriver *device
 
 void CBatteryController::timerCallback(const ros::TimerEvent& e)
 {
-    int code=device_p_->getBattery(level_);
+    int code=device_p_->getBattery(level_,stat_);
     if (code<0)
         ROS_ERROR("Unable to get battery level from the base control board");
     else
     {
-        ROS_DEBUG_STREAM("Obtained battery level " << level_ << " from the base control board ");
+        ROS_DEBUG_STREAM("Obtained battery level " << level_ << " and stat " << stat_ << " from the base control board ");
         qbo_arduqbo::BatteryLevel msg;
-        msg.level=level_;
+        msg.level=level_/10.0;
+        msg.stat=stat_;
         msg.header.stamp = ros::Time::now();
         //publish
         battery_pub_.publish(msg);
