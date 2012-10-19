@@ -68,7 +68,7 @@ uncontrolledservos: {
 }
 
 dynamixelservo: {
-    head_pan_joint: {id: 1, invert: false, max_angle_degrees: 66.0, min_angle_degrees: -66.0, range: 300.0, ticks: 1024, neutral: 570},
+    head_pan_joint: {id: 1, invert: false, max_angle_degrees: 66.0, min_angle_degrees: -66.0, range: 300.0, ticks: 1024, neutral: 512},
     head_tilt_joint: {id: 2, invert: false, max_angle_degrees: 20.0, min_angle_degrees: -37.8, range: 300.0, ticks: 1024, neutral: 512},
 }
 
