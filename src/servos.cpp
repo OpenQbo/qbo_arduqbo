@@ -188,7 +188,7 @@ void DynamixelServo::setAngle(float ang, float velocity)
     ticks += neutral_;
 
     changeTorque(254);
-    dxl_write_word(id_,P_TORQUE_LIMIT_L,255);
+    dxl_write_word(id_,P_TORQUE_LIMIT_L,1023);
     dxl_write_word(id_,P_GOAL_POSITION_L,ticks);
     dxl_write_word(id_,P_GOAL_SPEED_L,speed);
 }
