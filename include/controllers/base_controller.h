@@ -34,6 +34,9 @@
 #include <nav_msgs/Odometry.h>
 #include <ros/console.h>
 #include <std_srvs/Empty.h>
+#include <qbo_arduqbo/BaseStop.h>
+#include <set>
+#include <string>
 
 class CBaseController : public CController
 {
@@ -44,7 +47,9 @@ class CBaseController : public CController
         ros::Subscriber twist_sub_;
         ros::Publisher odom_pub_;
         ros::ServiceServer stall_unlock_service_;
+        ros::ServiceServer base_stop_service_;
         tf::TransformBroadcaster odom_broadcaster_;
+        std::set<std::string> base_stoppers_;
         
         // internal data            
         float v_linear_;             // current setpoint velocity
@@ -61,6 +66,8 @@ class CBaseController : public CController
         void twistCallback(const geometry_msgs::Twist::ConstPtr& msg);
         bool unlockStall(std_srvs::Empty::Request &req,
                          std_srvs::Empty::Response &res );
+        bool baseStopService(qbo_arduqbo::BaseStop::Request  &req,
+                         qbo_arduqbo::BaseStop::Response &res);
 };
 
 #endif

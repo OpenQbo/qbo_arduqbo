@@ -46,6 +46,7 @@ CBaseController::CBaseController(std::string name, CQboduinoDriver *device_p, ro
     twist_sub_ = nh.subscribe<geometry_msgs::Twist>(topic, 1, &CBaseController::twistCallback, this);
     odom_pub_ = nh.advertise<nav_msgs::Odometry>(odom_topic, 1);
     stall_unlock_service_ = nh.advertiseService("unlock_motors_stall", &CBaseController::unlockStall,this);
+    base_stop_service_ = nh.advertiseService("stop_base", &CBaseController::baseStopService,this);
     then_=ros::Time::now();
     timer_=nh.createTimer(ros::Duration(1/rate_),&CBaseController::timerCallback,this);
     odom_.header.stamp = then_;
@@ -150,7 +151,16 @@ void CBaseController::timerCallback(const ros::TimerEvent& e)
     // update motors
     if (v_dirty_)
     {
-        int code=device_p_->setSpeed(v_linear_, v_angular_);
+        int code;
+        if((int)base_stoppers_.size()>0)
+        {
+            code=device_p_->setSpeed(v_linear_ < 0 ? v_linear_ : 0, v_angular_);
+            //code=device_p_->setSpeed(0, v_angular_);
+        }
+        else
+        { 
+            code=device_p_->setSpeed(v_linear_, v_angular_);
+        }
 	if (code<0)
 	    ROS_ERROR("Unable to send speed command to the base controler board");
 	else
@@ -174,4 +184,27 @@ bool CBaseController::unlockStall(std_srvs::Empty::Request &req,
       ROS_DEBUG_STREAM("stall reset command sent to the base board");
       return true;
   }
+}
+
+bool CBaseController::baseStopService(qbo_arduqbo::BaseStop::Request  &req,
+                      qbo_arduqbo::BaseStop::Response &res)
+{
+    //return true;
+    if(req.state==true)
+    {
+      //ROS_INFO("Alarm ON");
+      //add sender to senders stop vector
+      base_stoppers_.insert(req.sender);
+      v_dirty_=true;
+    }
+    else
+    {
+      //ROS_INFO("Alarm OFF");
+      //remove sender from stop vector
+      if(base_stoppers_.find(req.sender)!=base_stoppers_.end())
+      {
+        base_stoppers_.erase(base_stoppers_.find(req.sender));
+      }
+    }
+    return true;
 }

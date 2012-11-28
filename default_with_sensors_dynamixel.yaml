@@ -4,6 +4,7 @@ dmxPort: /dev/ttyUSB2
 timeout1: 0.35
 timeout2: 0.35
 rate: 6.0
+set_alarm: false
 controllers: {
     "j_con": {
         type: joint_controller,
@@ -52,11 +53,11 @@ controllers: {
         topic: /distance_sensors_state,
         sensors: {
           front: {
-            front_left_srf10: { type: srf10, address: 224, frame_id: front_left_addon },
-            front_right_srf10: { type: srf10, address: 226, frame_id: front_right_addon }
+            front_left_srf10: { type: srf10, address: 224, frame_id: front_left_addon, alert_distance: 0.1 },
+            front_right_srf10: { type: srf10, address: 226, frame_id: front_right_addon, alert_distance: 0.1 }
           },
           floor: {
-            floor_sensor: {type: GP2Y0A21YK, address: 8, frame_id: front_addon },
+            floor_sensor: {type: GP2Y0A21YK, address: 8, frame_id: front_addon, alert_distance: 20.0 },
           }
         }
     }
