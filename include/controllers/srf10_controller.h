@@ -44,7 +44,7 @@
 class CDistanceSensor
 {
     public:
-        CDistanceSensor(std::string name, uint8_t address, std::string topic, ros::NodeHandle& nh, std::string type, std::string frame_id="", float alert_distance=0);
+        CDistanceSensor(std::string name, uint8_t address, std::string topic, ros::NodeHandle& nh, std::string type, std::string frame_id="", float min_alert_distance=-1, float max_alert_distance=-1);
         void publish(unsigned int readedValue, ros::Time time);
         void setAlarm(bool state, float distance=-1);
         std::string getName();
@@ -60,7 +60,8 @@ class CDistanceSensor
         //pcl::PointCloud<pcl::PointXYZ> cloud_;
         //sensor_msgs::PointCloud2 msg_;
         sensor_msgs::PointCloud cloud_;
-        double alert_distance_;
+        double min_alert_distance_;
+        double max_alert_distance_;
         bool alert_;
 };
 

@@ -35,8 +35,8 @@
 #include <myXmlRpc.h>
 #include <pthread.h>
 
-CDistanceSensor::CDistanceSensor(std::string name, uint8_t address, std::string topic, ros::NodeHandle& nh, std::string type, std::string frame_id, float alert_distance) :
-    name_(name), address_(address), nh_(nh), type_(type), alert_distance_(alert_distance), alert_(false)
+CDistanceSensor::CDistanceSensor(std::string name, uint8_t address, std::string topic, ros::NodeHandle& nh, std::string type, std::string frame_id, float min_alert_distance, float max_alert_distance) :
+    name_(name), address_(address), nh_(nh), type_(type), min_alert_distance_(min_alert_distance), max_alert_distance_(max_alert_distance), alert_(false)
 {
     //cloud_.points.resize(1);
     cloud_.set_points_size(1);
@@ -77,8 +77,15 @@ void CDistanceSensor::publish(unsigned int readedValue, ros::Time time)
     nh_.param("set_alarm", send_stop, false);
     //if(send_stop)
         //ROS_INFO("Alarm set");
-    //std::cout << "distancia: " << distance << " limite: " << alert_distance_ << std::endl;
-    if(distance<=alert_distance_)
+    if((min_alert_distance_!=-1 && distance<=min_alert_distance_) && (max_alert_distance_!=-1 && distance>=max_alert_distance_))
+    {
+        this->setAlarm(true, distance);
+    }
+    if(min_alert_distance_!=-1 && distance<=min_alert_distance_)
+    {
+        this->setAlarm(true, distance);
+    }
+    else if(max_alert_distance_!=-1 && distance>=max_alert_distance_)
     {
         this->setAlarm(true, distance);
     }
@@ -109,7 +116,7 @@ void CDistanceSensor::setAlarm(bool state, float distance)
     {
         if(state && !alert_)
         {
-            ROS_INFO("Sensor: %s Alarm SET. Detected: %f Limit: %f", name_.c_str(),distance,alert_distance_);
+            ROS_INFO("Sensor: %s Alarm SET. Detected: %f Min limit: %f Max limit: %f", name_.c_str(),distance,min_alert_distance_,max_alert_distance_);
             alert_=true;
             if(base_stop_service_client_.exists())
             {
@@ -179,21 +186,23 @@ CSrf10Controller::CSrf10Controller(std::string name, CQboduinoDriver *device_p, 
         std::string type;
         std::string frame_id;
         std::string sensor_topic;
-        double alert_distance;
+        double max_alert_distance;
+        double min_alert_distance;
         nh.getParam("controllers/"+name+"/sensors/front/"+(*it).first+"/address", address);
         nh.getParam("controllers/"+name+"/sensors/front/"+(*it).first+"/type", type);
         nh.param("controllers/"+name+"/sensors/front/"+(*it).first+"/frame_id", frame_id, std::string(""));
         nh.param("controllers/"+name+"/sensors/front/"+(*it).first+"/topic", sensor_topic, topic+"/"+(*it).first);
-        nh.param("controllers/"+name+"/sensors/front/"+(*it).first+"/alert_distance", alert_distance, 0.0);
+        nh.param("controllers/"+name+"/sensors/front/"+(*it).first+"/min_alert_distance", min_alert_distance, -1.0);
+        nh.param("controllers/"+name+"/sensors/front/"+(*it).first+"/max_alert_distance", max_alert_distance, -1.0);
         //printf("%f\n",alert_distance);
         if (type.compare("srf10")==0)
         {
-            srf10Sensors_[(uint8_t)address]=new CDistanceSensor((*it).first, (uint8_t)address, sensor_topic, nh, type, frame_id, alert_distance);
+            srf10Sensors_[(uint8_t)address]=new CDistanceSensor((*it).first, (uint8_t)address, sensor_topic, nh, type, frame_id, min_alert_distance, max_alert_distance);
             srf10SensorsUpdateGroup_[(uint8_t)address]=1;
         }
         else if (type.compare("gp2d12")==0 || type.compare("gp2d120")==0 || type.compare("GP2Y0A21YK")==0)
         {
-            adcSensors_[(uint8_t)address]=new CDistanceSensor((*it).first, (uint8_t)address, sensor_topic, nh, type, frame_id, alert_distance);
+            adcSensors_[(uint8_t)address]=new CDistanceSensor((*it).first, (uint8_t)address, sensor_topic, nh, type, frame_id, min_alert_distance, max_alert_distance);
             adcSensorsAddresses_.push_back((uint8_t)address);
         }
         ROS_INFO_STREAM("Sensor " << (*it).first << " of type " << type << " inicializado");
@@ -224,21 +233,23 @@ CSrf10Controller::CSrf10Controller(std::string name, CQboduinoDriver *device_p, 
         std::string type;
         std::string frame_id;
         std::string sensor_topic;
-        double alert_distance;
+        double min_alert_distance;
+        double max_alert_distance;
         nh.getParam("controllers/"+name+"/sensors/back/"+(*it).first+"/address", address);
         nh.getParam("controllers/"+name+"/sensors/back/"+(*it).first+"/type", type);
         nh.param("controllers/"+name+"/sensors/back/"+(*it).first+"/frame_id", frame_id, std::string(""));
         nh.param("controllers/"+name+"/sensors/back/"+(*it).first+"/topic", sensor_topic, topic+"/"+(*it).first);
-        nh.param("controllers/"+name+"/sensors/back/"+(*it).first+"/alert_distance", alert_distance, 0.0);
+        nh.param("controllers/"+name+"/sensors/back/"+(*it).first+"/min_alert_distance", min_alert_distance, -1.0);
+        nh.param("controllers/"+name+"/sensors/back/"+(*it).first+"/max_alert_distance", max_alert_distance, -1.0);
         //printf("%f\n",alert_distance);
         if (type.compare("srf10")==0)
         {
-            srf10Sensors_[(uint8_t)address]=new CDistanceSensor((*it).first, (uint8_t)address, sensor_topic, nh, type, frame_id, alert_distance);
+            srf10Sensors_[(uint8_t)address]=new CDistanceSensor((*it).first, (uint8_t)address, sensor_topic, nh, type, frame_id, min_alert_distance, max_alert_distance);
             srf10SensorsUpdateGroup_[(uint8_t)address]=1;
         }
         else if (type.compare("gp2d12")==0 || type.compare("gp2d120")==0  || type.compare("GP2Y0A21YK")==0)
         {
-            adcSensors_[(uint8_t)address]=new CDistanceSensor((*it).first, (uint8_t)address, sensor_topic, nh, type, frame_id, alert_distance);
+            adcSensors_[(uint8_t)address]=new CDistanceSensor((*it).first, (uint8_t)address, sensor_topic, nh, type, frame_id, min_alert_distance, max_alert_distance);
             adcSensorsAddresses_.push_back((uint8_t)address);
         }
         ROS_INFO_STREAM("Sensor " << (*it).first << " of type " << type << " inicializado");
@@ -269,12 +280,14 @@ CSrf10Controller::CSrf10Controller(std::string name, CQboduinoDriver *device_p, 
         std::string type;
         std::string frame_id;
         std::string sensor_topic;
-        double alert_distance;
+        double min_alert_distance;
+        double max_alert_distance;
         nh.getParam("controllers/"+name+"/sensors/floor/"+(*it).first+"/address", address);
         nh.getParam("controllers/"+name+"/sensors/floor/"+(*it).first+"/type", type);
         nh.param("controllers/"+name+"/sensors/floor/"+(*it).first+"/frame_id", frame_id, std::string(""));
         nh.param("controllers/"+name+"/sensors/floor/"+(*it).first+"/topic", sensor_topic, topic+"/"+(*it).first);
-        nh.param("controllers/"+name+"/sensors/floor/"+(*it).first+"/alert_distance", alert_distance, 0.0);
+        nh.param("controllers/"+name+"/sensors/floor/"+(*it).first+"/min_alert_distance", min_alert_distance, -1.0);
+        nh.param("controllers/"+name+"/sensors/floor/"+(*it).first+"/max_alert_distance", max_alert_distance, -1.0);
         //printf("%f\n",alert_distance);
         if (type.compare("srf10")==0)
         {
@@ -283,7 +296,7 @@ CSrf10Controller::CSrf10Controller(std::string name, CQboduinoDriver *device_p, 
         }
         else if (type.compare("gp2d12")==0 || type.compare("gp2d120")==0  || type.compare("GP2Y0A21YK")==0)
         {
-            adcSensors_[(uint8_t)address]=new CDistanceSensor((*it).first, (uint8_t)address, sensor_topic, nh, type, frame_id, alert_distance);
+            adcSensors_[(uint8_t)address]=new CDistanceSensor((*it).first, (uint8_t)address, sensor_topic, nh, type, frame_id, min_alert_distance, max_alert_distance);
             adcSensorsAddresses_.push_back((uint8_t)address);
         }
         ROS_INFO_STREAM("Sensor " << (*it).first << " of type " << type << " inicializado");
