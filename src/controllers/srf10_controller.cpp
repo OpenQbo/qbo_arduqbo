@@ -74,7 +74,7 @@ void CDistanceSensor::publish(unsigned int readedValue, ros::Time time)
        distance = 12343.85 * pow((float)readedValue,-1.15);
     }
     bool send_stop;
-    nh_.param("set_alarm", send_stop, false);
+    nh_.param("autostop", send_stop, false);
     //if(send_stop)
         //ROS_INFO("Alarm set");
     if((min_alert_distance_!=-1 && distance<=min_alert_distance_) && (max_alert_distance_!=-1 && distance>=max_alert_distance_))
@@ -111,7 +111,7 @@ void * CDistanceSensor::serviceCallFunction( void *args )
 void CDistanceSensor::setAlarm(bool state, float distance)
 {
     bool send_stop;
-    nh_.param("set_alarm", send_stop, false);
+    nh_.param("autostop", send_stop, false);
     if(send_stop)
     {
         if(state && !alert_)
