@@ -1,6 +1,6 @@
 Package: qboros-electric-qbo-arduqbo
 Source: qboros-electric-qbo-arduqbo
-Version: 1.0-openqbo1
+Version: 1.1-openqbo0
 Section: OpenQbo
 Depends: qboros-electric-qbo-cereal-port
 Priority: standard
