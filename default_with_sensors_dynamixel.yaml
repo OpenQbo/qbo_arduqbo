@@ -4,7 +4,7 @@ dmxPort: /dev/ttyUSB2
 timeout1: 0.35
 timeout2: 0.35
 rate: 6.0
-set_alarm: true
+set_alarm: false
 controllers: {
     "j_con": {
         type: joint_controller,
