@@ -148,6 +148,23 @@ void CDistanceSensor::setAlarm(bool state, float distance)
             }
         }
     }
+    else if(!send_stop && alert_)
+    {
+      ROS_INFO("Sensor: %s Alarm UNSET", name_.c_str());
+      alert_=false;
+      qbo_arduqbo::BaseStop srv;
+      if(base_stop_service_client_.exists())
+      {
+        pthread_t thread;
+        base_stop_service_msg_.request.sender = name_;
+        base_stop_service_msg_.request.state = false;
+        pthread_create( &thread, NULL, &CDistanceSensor::serviceCallFunction, NULL);
+      }
+      else
+      {
+        ROS_INFO("No stop service available");
+      }
+    }
 }
 
 std::string CDistanceSensor::getName()
