@@ -225,7 +225,7 @@ void CImuController::timerCallback(const ros::TimerEvent& e)
 */
         //imu_msg_.angular_velocity.z=((float)gyroZ)*0.0175*0.017453293;
         //imu_msg_.angular_velocity.z=(((float)gyroZ0_)*0.25+((float)gyroZ1_)*0.25+((float)gyroZ2_)*0.25+((float)gyroZ)*0.25)*0.001132571;
-        imu_msg_.angular_velocity.x=((float)gyroZ)*0.001132571;
+        imu_msg_.angular_velocity.x=((float)gyroX)*0.001132571;
         imu_msg_.angular_velocity.y=((float)gyroY)*0.001132571;
         imu_msg_.angular_velocity.z=((float)gyroZ)*0.001132571;
         gyroX2_=gyroX1_;
